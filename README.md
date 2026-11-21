@@ -21,14 +21,3 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
-
-## Status
-
-Early scaffold. Currently supports:
-
-- Basic GTTW / GTM1 / Tex1 header parsing
-- Palette extraction and editing UI
-- OpenGL viewport with orbit camera
-- Live texture update from palette changes
-
-More complete geometry + texture binding coming next.
