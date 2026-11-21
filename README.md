@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 [![Gran Turismo 3](https://img.shields.io/badge/Gran%20Turismo-3-red?logo=playstation&logoColor=red)]()
-[![GitHub release](https://img.shields.io/github/v/release/JeevesGB/GTExplorer)](https://github.com/JeevesGB/GT3WheelEditor/releases)
+[![GitHub release](https://img.shields.io/github/v/release/JeevesGB/GT3WheelEditor)](https://github.com/JeevesGB/GT3WheelEditor/releases)
 
 A colour / palette editor for Gran Turismo 3 wheel files (GTTW), inspired by pPainter.
 
