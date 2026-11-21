@@ -1,4 +1,4 @@
-# GT3 Wheel Painter
+# GT3 Wheel Editor
 
 <img width="512" height="512" alt="ico" src="ui/ico.png" />
 
