@@ -1,4 +1,3 @@
-"""Minimal GLB loader for the viewport barrel mesh."""
 from __future__ import annotations
 
 import json
@@ -10,7 +9,6 @@ import numpy as np
 
 
 def _quat_to_matrix(q: List[float]) -> np.ndarray:
-    """glTF quaternion [x,y,z,w] → 3x3 rotation matrix."""
     x, y, z, w = q
     return np.array(
         [

@@ -11,9 +11,8 @@
    load time (see main.py), because Qt resolves url() against
    the current working directory, not against this file.
 
-   Bevel convention (QSS only allows one colour per border side,
-   so the classic two-pixel bevel is approximated):
-     raised : top/left #ffffff   bottom/right #404040
+   Bevel convention (QSS only allows one colour per border side):
+     raised : top/left #ffffff   bottom/right #404040 (or #808080 for flat)
      sunken : top/left #808080   bottom/right #ffffff
    ============================================================ */
 
@@ -147,7 +146,7 @@ QToolBar::handle:horizontal {
 QToolButton {
     background-color: #c0c0c0;
     border: 1px solid transparent;
-    padding: 3px 8px;
+    padding: 3px 4px;
     min-height: 18px;
 }
 
@@ -164,7 +163,7 @@ QToolButton:checked {
     border-left-color: #808080;
     border-right-color: #ffffff;
     border-bottom-color: #ffffff;
-    padding: 4px 7px 2px 9px;
+    padding: 4px 3px 2px 5px;
 }
 
 QToolButton:checked {
@@ -217,10 +216,7 @@ QPushButton:disabled {
 /* Default button: heavier black frame */
 QPushButton:default {
     border: 3px solid;
-    border-top-color: #000000;
-    border-left-color: #000000;
-    border-right-color: #000000;
-    border-bottom-color: #000000;
+    border-color: #000000;
     padding: 2px 11px;
 }
 
@@ -252,7 +248,6 @@ QLabel#infoLabel {
 QGroupBox {
     background-color: #c0c0c0;
     border: 2px groove #ffffff;
-    border-style: groove;
     margin-top: 8px;
     padding-top: 6px;
     font-weight: normal;
@@ -387,7 +382,7 @@ QComboBox {
     border-left-color: #808080;
     border-right-color: #ffffff;
     border-bottom-color: #ffffff;
-    padding: 1px 3px;
+    padding: 1px 18px 1px 3px;
     min-height: 16px;
     selection-background-color: #000080;
     selection-color: #ffffff;
@@ -457,12 +452,7 @@ QListView::item, QListWidget::item, QTreeView::item {
 }
 
 QListView::item:selected, QListWidget::item:selected,
-QTreeView::item:selected, QTableView::item:selected {
-    background-color: #000080;
-    color: #ffffff;
-}
-
-/* Selected row in an unfocused list stays navy, as in Win9x */
+QTreeView::item:selected, QTableView::item:selected,
 QListView::item:selected:!active, QListWidget::item:selected:!active,
 QTreeView::item:selected:!active, QTableView::item:selected:!active {
     background-color: #000080;
@@ -645,16 +635,16 @@ QScrollBar::add-line, QScrollBar::sub-line {
     subcontrol-origin: margin;
 }
 
-QScrollBar::add-line:vertical  { height: 16px; subcontrol-position: bottom; }
-QScrollBar::sub-line:vertical  { height: 16px; subcontrol-position: top; }
-QScrollBar::add-line:horizontal { width: 16px; subcontrol-position: right; }
-QScrollBar::sub-line:horizontal { width: 16px; subcontrol-position: left; }
+QScrollBar::add-line:vertical   { height: 16px; subcontrol-position: bottom; }
+QScrollBar::sub-line:vertical   { height: 16px; subcontrol-position: top; }
+QScrollBar::add-line:horizontal { width: 16px;  subcontrol-position: right; }
+QScrollBar::sub-line:horizontal { width: 16px;  subcontrol-position: left; }
 
 QScrollBar::add-line:pressed, QScrollBar::sub-line:pressed {
     border-top-color: #808080;
     border-left-color: #808080;
-    border-right-color: #808080;
-    border-bottom-color: #808080;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
 }
 
 QScrollBar::up-arrow:vertical    { image: url(@ICONS@/up.png);    width: 7px; height: 4px; }

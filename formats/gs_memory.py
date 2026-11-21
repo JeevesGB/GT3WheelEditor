@@ -1,4 +1,3 @@
-"""Minimal PS2 GS local-memory model for Tex1 decode (T4/T8 + CT32 CLUT)."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Tuple
@@ -152,7 +151,6 @@ class GsMemory:
 
 
 def decode_tex1_image(tex1_raw: bytes, texture_index: int = 0) -> np.ndarray | None:
-    """Upload all buffers, decode texture_index to RGBA numpy HxWx4."""
     if len(tex1_raw) < 0x28 or tex1_raw[0:4] != b'Tex1':
         return None
     tex_count = struct.unpack_from('<H', tex1_raw, 0x14)[0]
@@ -200,7 +198,6 @@ def decode_tex1_image(tex1_raw: bytes, texture_index: int = 0) -> np.ndarray | N
 
 @dataclass
 class Tex1Palette:
-    """Editable 16-colour CLUT for a T4 texture, with file offsets for write-back."""
     entries: list  # list of (r,g,b,a) 0-255 GS alpha
     # byte offsets into tex1.raw for each entry (4 bytes each, little-endian RGBA)
     offsets: list
@@ -210,10 +207,6 @@ class Tex1Palette:
 
 
 def extract_tex1_palette(tex1_raw: bytes, texture_index: int = 0) -> Tex1Palette | None:
-    """
-    Upload buffers, read the T4 CLUT via CSM1, and record linear file offsets
-    so colours can be written back.
-    """
     if len(tex1_raw) < 0x28 or tex1_raw[0:4] != b'Tex1':
         return None
     tex_count = struct.unpack_from('<H', tex1_raw, 0x14)[0]
@@ -295,7 +288,6 @@ def extract_tex1_palette(tex1_raw: bytes, texture_index: int = 0) -> Tex1Palette
 
 
 def apply_palette_to_tex1(tex1_raw: bytearray, palette: Tex1Palette) -> None:
-    """Write palette entries back into tex1_raw at recorded offsets."""
     for i, (r, g, b, a) in enumerate(palette.entries):
         if i >= len(palette.offsets):
             break
@@ -309,12 +301,10 @@ def apply_palette_to_tex1(tex1_raw: bytearray, palette: Tex1Palette) -> None:
 
 
 def redecode_with_palette(tex1_raw: bytes, texture_index: int = 0) -> np.ndarray | None:
-    """Convenience: decode texture image after palette was patched in raw."""
     return decode_tex1_image(tex1_raw, texture_index)
 
 
 def decode_tex1_indices(tex1_raw: bytes, texture_index: int = 0) -> np.ndarray | None:
-    """Return HxW uint8 array of palette indices for an indexed texture."""
     if len(tex1_raw) < 0x28 or tex1_raw[0:4] != b'Tex1':
         return None
     tex_count = struct.unpack_from('<H', tex1_raw, 0x14)[0]
@@ -367,14 +357,6 @@ def make_highlight_texture(
     flash_on: bool = True,
     keep: float = 0.35,
 ) -> np.ndarray:
-    """
-    Mark texels that use ``selected``.
-
-    Non-selected pixels stay exactly as in the real texture.
-    Selected pixels are replaced with a high-contrast magenta so the
-    regions are obvious even on grey metallic rims (and on near-black
-    indices that would otherwise be invisible).
-    """
     if indices is None or selected < 0 or not flash_on:
         return rgba
 

@@ -1,17 +1,7 @@
-"""
-Minimal GTM1 parser focused on wheels.
-
-We only need enough to:
-- locate texture sets (Tex1)
-- extract the rim texture (runtime slot / texture-LOD table)
-- pull geometry for a simple OpenGL preview
-"""
-
 from __future__ import annotations
 import struct
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
-
 from .tex1 import Tex1
 
 
@@ -81,14 +71,12 @@ class GTM1:
         return bytes(self.raw)
 
     def get_primary_rim_tex1(self) -> Optional[Tex1]:
-        """Heuristic: return the first successfully parsed Tex1 that looks like a rim."""
         if not self.texture_sets:
             return None
         # Prefer the first non-empty set; later we can follow the LOD table properly.
         return self.texture_sets[0].tex1
 
     def patch_tex1(self, tex_ref: TextureSetRef, new_tex1_bytes: bytes) -> None:
-        """Replace the bytes of a Tex1 in-place (must be same length for now)."""
         if len(new_tex1_bytes) != len(tex_ref.tex1.raw):
             raise ValueError("Tex1 size changed – in-place patch not supported yet")
         start = tex_ref.offset

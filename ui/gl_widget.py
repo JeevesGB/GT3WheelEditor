@@ -235,7 +235,6 @@ class GLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
 
     def set_mesh(self, mesh: Optional[MeshData]):
-        """Still receives GTM1 mesh for stats; display uses barrel GLB."""
         self.mesh = mesh
         self.update()
 
@@ -249,7 +248,6 @@ class GLWidget(QOpenGLWidget):
 
     @staticmethod
     def _dominant_rgb(rgba: Optional[np.ndarray]):
-        """Pick a representative rim metal colour from the face texture."""
         if rgba is None or rgba.size == 0:
             return (0.62, 0.62, 0.65)
         px = rgba.reshape(-1, rgba.shape[-1]).astype(np.float32)

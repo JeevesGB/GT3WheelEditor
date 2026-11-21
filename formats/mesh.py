@@ -1,11 +1,3 @@
-"""
-GTM1 mesh decoder for GT3 wheels.
-
-Extracts positions, normals and triangle indices from VIF packets
-inside GTM1 chunks. Layout documented in matt-pulsipher/GT3-revisited
-docs/formats/car_model.md (VIF packets section).
-"""
-
 from __future__ import annotations
 import struct
 from dataclasses import dataclass, field
@@ -27,7 +19,6 @@ def _rdf(d: bytes, o: int) -> float:
 
 @dataclass
 class MeshData:
-    """Decoded triangle mesh ready for OpenGL."""
     positions: np.ndarray   # (N, 3) float32
     normals: np.ndarray     # (N, 3) float32
     indices: np.ndarray     # (M,) uint32 triangle list
@@ -48,16 +39,7 @@ def _parse_vif_packet(data: bytes, pkt_off: int, qwc: int) -> Tuple[
     List[int],
     List[Tuple[float, float]],
 ]:
-    """
-    Walk a VIF stream and pull out:
-      - positions (V3-32 @ addr 0x00)
-      - normals   (V3-32 @ addr 0x80)  [lit packets]
-      - strip table (S-8 @ 0x40) -> expanded to per-strip vertex counts
-      - uvs       (V2-32 @ 0x40, masked) when present
 
-    Returns (positions, normals, strip_counts, uvs).
-    strip_counts[i] = number of vertices in strip i.
-    """
     end = pkt_off + qwc * 16
     if end > len(data):
         end = len(data)
@@ -167,7 +149,6 @@ def _parse_vif_packet(data: bytes, pkt_off: int, qwc: int) -> Tuple[
 
 
 def _strips_to_tris(strip_counts: List[int], base: int = 0) -> List[int]:
-    """Convert triangle-strip vertex counts into a triangle index list."""
     indices: List[int] = []
     v = base
     for count in strip_counts:
@@ -185,7 +166,6 @@ def _strips_to_tris(strip_counts: List[int], base: int = 0) -> List[int]:
 
 
 def _fallback_fan(n: int, base: int = 0) -> List[int]:
-    """If strip table is missing, emit a simple triangle fan (rarely useful)."""
     if n < 3:
         return []
     indices = []
@@ -195,10 +175,6 @@ def _fallback_fan(n: int, base: int = 0) -> List[int]:
 
 
 def decode_gtm1_mesh(gtm1_data: bytes, prefer_lit: bool = True) -> Optional[MeshData]:
-    """
-    Decode lit mesh geometry from a GTM1 block.
-    Combines every lit chunk (kind == 1) so rim + spokes are both present.
-    """
     if len(gtm1_data) < 0x40 or gtm1_data[0:4] != b"GTM1":
         return None
 

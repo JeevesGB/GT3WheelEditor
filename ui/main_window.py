@@ -1,12 +1,7 @@
-"""
-Main application window – Windows 98 style.
-"""
-
 from __future__ import annotations
 from pathlib import Path
 import shutil
 from typing import Optional
-
 from PyQt6.QtCore import Qt, QSettings
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (
@@ -14,7 +9,6 @@ from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox, QLabel, QStatusBar, QToolBar,
     QGroupBox, QFrame, QSizePolicy, QListWidget, QListWidgetItem
 )
-
 from formats.gttw import GTTW
 from formats.tex1 import ClutEntry
 from formats.mesh import decode_gtm1_mesh
@@ -76,7 +70,6 @@ class MainWindow(QMainWindow):
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setChildrenCollapsible(False)
 
-        # ---- Left: 3D viewport in a sunken frame ----
         view_box = QGroupBox("Preview")
         view_layout = QVBoxLayout(view_box)
         view_layout.setContentsMargins(6, 14, 6, 6)
@@ -98,7 +91,6 @@ class MainWindow(QMainWindow):
 
         splitter.addWidget(view_box)
 
-        # ---- Right: info + palette ----
         right = QWidget()
         right.setMinimumWidth(260)
         right.setMaximumWidth(340)
@@ -134,7 +126,6 @@ class MainWindow(QMainWindow):
         self.palette = PaletteWidget()
         self.palette.palette_changed.connect(self._on_palette_changed)
         self.palette.selection_changed.connect(self._on_palette_selected)
-        # Hide internal title – group box already has one
         if hasattr(self.palette, "title"):
             self.palette.title.hide()
         pal_layout.addWidget(self.palette)
@@ -287,7 +278,6 @@ class MainWindow(QMainWindow):
         mesh = decode_gtm1_mesh(bytes(gttw.gtm1.raw))
         self.gl_view.set_mesh(mesh)
 
-        # Real Tex1 CLUT (CSM1) + textured preview
         clut: list[ClutEntry] = []
         tex_img = None
         self._tex_palette = None
@@ -342,8 +332,6 @@ class MainWindow(QMainWindow):
             self.gl_view.set_palette(clut)
             return
 
-        # By default an edit recolours the whole wheel: every other colour in
-        # this palette follows the edited colour's hue (shading is kept).
         edited = self.palette.selected_index
         whole = self.chk_whole.isChecked()
         target_hue = None
@@ -361,7 +349,6 @@ class MainWindow(QMainWindow):
             self.palette.refresh_swatches()
         self.gl_view.set_palette(clut)
 
-        # Sync edited colours into Tex1Palette and write into Tex1 raw
         for i, entry in enumerate(clut):
             if i < len(self._tex_palette.entries):
                 self._tex_palette.entries[i] = (entry.r, entry.g, entry.b, entry.a)
@@ -370,14 +357,11 @@ class MainWindow(QMainWindow):
         raw = bytearray(ref.tex1.raw)
         apply_palette_to_tex1(raw, self._tex_palette)
         ref.tex1.raw = raw
-        # Patch into GTM1 so Save writes the new colours
         try:
             self.gttw.gtm1.patch_tex1(ref, bytes(raw))
         except ValueError:
-            # size must match – always should for in-place CLUT edits
             pass
 
-        # ...and the same hue for every other texture / set of the wheel
         if target_hue is not None:
             try:
                 e = clut[edited]
@@ -386,7 +370,6 @@ class MainWindow(QMainWindow):
             except Exception as ex:
                 self._status_hint.setText(f"Recolour of other textures failed: {ex}")
 
-        # Live-update base texture + highlight
         raw = bytearray(self.gttw.gtm1.texture_sets[self._tex_ref_index].tex1.raw)
         self._tex_rgba = decode_tex1_image(bytes(raw), 0)
         self._tex_indices = decode_tex1_indices(bytes(raw), 0)
@@ -463,10 +446,6 @@ class MainWindow(QMainWindow):
 
 
     def _offer_backup(self, reason: str = "before changing the file") -> bool:
-        """
-        Ask whether to copy the current wheel to a .bak path.
-        Returns False if the user cancelled the whole operation.
-        """
         if self.current_path is None or not self.current_path.is_file():
             return True
         box = QMessageBox(self)
@@ -487,7 +466,6 @@ class MainWindow(QMainWindow):
             return False
         if clicked is yes:
             bak = self.current_path.with_suffix(self.current_path.suffix + ".bak")
-            # if path has no suffix, with_suffix replaces nothing useful — handle
             if self.current_path.suffix == "":
                 bak = Path(str(self.current_path) + ".bak")
             try:
@@ -499,8 +477,7 @@ class MainWindow(QMainWindow):
                     "GT3 Wheel Painter",
                     f"Could not create backup:\n{e}\n\nContinue anyway?",
                 )
-                # still allow continue — user already chose backup but it failed;
-                # ask once more
+
                 r = QMessageBox.question(
                     self,
                     "GT3 Wheel Painter",
@@ -512,7 +489,6 @@ class MainWindow(QMainWindow):
 
 
     def _set_status(self, message: str = "", hint=None):
-        """Update status bar without overlapping/clipping text."""
         if message:
             self._status_file.setText(message)
         if hint is not None:
@@ -561,7 +537,6 @@ class MainWindow(QMainWindow):
             ref = self.gttw.gtm1.texture_sets[self._tex_ref_index]
             raw = bytes(ref.tex1.raw)
 
-            # Refresh palette UI + 3D view from the active texture
             self._tex_palette = extract_tex1_palette(raw, 0)
             clut = []
             if self._tex_palette:
@@ -582,11 +557,9 @@ class MainWindow(QMainWindow):
 
 
     def _refresh_wheel_list(self, folder: Path, select: Optional[Path] = None):
-        """List sibling wheel files in ``folder`` for quick switching."""
         folder = Path(folder)
         if not folder.is_dir():
             return
-        # Prefer extensionless GTTW dumps and common suffixes
         files = []
         for p in sorted(folder.iterdir(), key=lambda x: x.name.lower()):
             if not p.is_file():
@@ -596,7 +569,6 @@ class MainWindow(QMainWindow):
                 continue
             if name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.bak', '.qss', '.py', '.txt', '.md', '.glb', '.blend')):
                 continue
-            # skip obvious non-wheels
             if name.lower().endswith(('.zip', '.exe', '.dll')):
                 continue
             files.append(p)

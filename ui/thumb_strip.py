@@ -1,9 +1,6 @@
-"""Horizontal thumbnail strip for quick wheel selection."""
 from __future__ import annotations
-
 from pathlib import Path
 from typing import Optional, List
-
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen
 from PyQt6.QtWidgets import (
@@ -35,7 +32,6 @@ class ThumbButton(QToolButton):
 
 
 class ThumbStrip(QWidget):
-    """Scrollable row of wheel thumbnails. Emits wheel_selected(Path)."""
 
     wheel_selected = pyqtSignal(object)  # Path
 

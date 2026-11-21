@@ -1,20 +1,8 @@
-"""
-GTTW (Gran Turismo Wheel) container parser.
-
-Layout (little-endian):
-  0x00  "GTTW"
-  0x0C  u32 size
-  0x10  u32 flags
-  0x1C  u32 gtm1_offset (normally 0x20)
-  0x20  GTM1 model data
-"""
-
 from __future__ import annotations
 import struct
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-
 from .gtm1 import GTM1
 
 
@@ -56,12 +44,9 @@ class GTTW:
         return cls.from_bytes(data, path=path)
 
     def to_bytes(self) -> bytes:
-        """Return the full GTTW with any modifications applied to the GTM1."""
-        # For now we only support CLUT patches inside the existing Tex1 data.
-        # The GTM1 object holds the (possibly modified) raw buffer.
+
         gtm1_bytes = self.gtm1.to_bytes()
         header = bytearray(self.raw[:0x20])
-        # Keep original size field for now; real size can be updated later.
         return bytes(header) + gtm1_bytes
 
     def save(self, path: Optional[str | Path] = None) -> None:

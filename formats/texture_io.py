@@ -1,10 +1,7 @@
-"""Export / import rim textures for Tex1 (T4 + CSM1 CLUT)."""
 from __future__ import annotations
-
 import struct
 from pathlib import Path
 from typing import Optional, Tuple, List
-
 import numpy as np
 from PIL import Image
 
@@ -20,7 +17,6 @@ from formats.gs_memory import (
 
 
 def export_texture_png(tex1_raw: bytes, path: str | Path, texture_index: int = 0) -> Path:
-    """Decode texture to RGBA and save as PNG."""
     img = decode_tex1_image(tex1_raw, texture_index)
     if img is None:
         raise ValueError("Could not decode texture")
@@ -30,14 +26,6 @@ def export_texture_png(tex1_raw: bytes, path: str | Path, texture_index: int = 0
 
 
 def _quantize_rgba(rgba: np.ndarray, n_colors: int = 16) -> Tuple[np.ndarray, List[Tuple[int, int, int, int]]]:
-    """
-    Quantize HxWx4 uint8 to ``n_colors`` (max 16 for T4).
-
-    Pixels with alpha < 128 all share ONE fully transparent palette entry
-    (index 0, GS alpha 0); every other entry is opaque (GS alpha 0x80). This
-    keeps cut-out backgrounds clean instead of smearing partial alphas.
-    Returns (indices HxW uint8, palette list of (r,g,b,a)).
-    """
     n_colors = min(n_colors, 16)
     h, w = rgba.shape[:2]
     transparent = rgba[:, :, 3] < 128
@@ -110,10 +98,6 @@ def encode_texture_into_tex1(
     palette: List[Tuple[int, int, int, int]],
     texture_index: int = 0,
 ) -> bytearray:
-    """
-    Write T4 indices + CLUT into GS memory model, then dump CT32 buffers
-    back into ``tex1_raw`` in place. Size of tex1_raw is unchanged.
-    """
     fields = _tex0_fields(tex1_raw, texture_index)
     if fields["psm"] not in (0x14, 0x24, 0x2C, 0x13, 0x1B):
         raise ValueError(f"Texture is not indexed (psm={fields['psm']})")
@@ -180,13 +164,6 @@ def replace_texture_from_image(
     texture_index: int = 0,
     keep_palette: bool = False,
 ) -> Tuple[bytearray, np.ndarray, List[Tuple[int, int, int, int]]]:
-    """
-    Load an image, resize to the texture's power-of-two size, quantize to 16
-    colours (unless keep_palette and an existing CLUT can be remapped), encode
-    into tex1_raw.
-
-    Returns (tex1_raw, indices, palette_entries).
-    """
     fields = _tex0_fields(tex1_raw, texture_index)
     tw, th = fields["width"], fields["height"]
 
@@ -225,13 +202,6 @@ def replace_all_textures_from_image(
     image_path: str | Path,
     keep_palette: bool = False,
 ) -> int:
-    """
-    Replace EVERY indexed texture of every Tex1 set in ``gtm1`` with the image
-    (resized to each texture's own size). A wheel stores the same artwork at
-    several sizes / sets (LODs, paint variants) and the game picks between
-    them, so replacing only one leaves the old wheel showing.
-    Returns the number of textures replaced.
-    """
     count = 0
     for ref in gtm1.texture_sets:
         raw = bytearray(ref.tex1.raw)

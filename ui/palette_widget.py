@@ -1,10 +1,5 @@
-"""
-Simple pPainter-style palette editor.
-"""
-
 from __future__ import annotations
 from typing import List, Optional, Callable
-
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from PyQt6.QtGui import QColor, QPainter, QBrush, QPen, QMouseEvent
 from PyQt6.QtWidgets import (
@@ -16,7 +11,6 @@ from formats.tex1 import ClutEntry
 
 
 class PaletteSwatch(QWidget):
-    """Single colour swatch that can be clicked to edit."""
     clicked = pyqtSignal(int)
 
     def __init__(self, index: int, entry: ClutEntry, parent=None):
@@ -39,7 +33,6 @@ class PaletteSwatch(QWidget):
         p = QPainter(self)
         r, g, b, a = self.entry.to_rgba()
         color = QColor(r, g, b, a)
-        # Classic raised/sunken style like Win98 color chips
         if self._selected:
             p.fillRect(0, 0, 28, 28, QColor(0, 0, 128))
             p.fillRect(3, 3, 22, 22, color)
@@ -61,7 +54,6 @@ class PaletteSwatch(QWidget):
 
 
 class PaletteWidget(QWidget):
-    """Grid of palette swatches + colour editor controls."""
     palette_changed = pyqtSignal(list)  # List[ClutEntry]
     selection_changed = pyqtSignal(int)  # selected palette index
 
@@ -84,7 +76,6 @@ class PaletteWidget(QWidget):
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.grid_frame)
 
-        # Colour controls — Edit on its own row, spins in a 2×2 grid
         self.btn_edit = QPushButton("Edit")
         self.btn_edit.setMinimumHeight(24)
         self.btn_edit.clicked.connect(self._edit_colour)
@@ -118,7 +109,6 @@ class PaletteWidget(QWidget):
             self.select(0)
 
     def _rebuild_grid(self):
-        # Clear old
         while self.grid_layout.count():
             item = self.grid_layout.takeAt(0)
             if item.widget():
@@ -133,7 +123,6 @@ class PaletteWidget(QWidget):
             self.grid_layout.addWidget(sw, i // cols, i % cols)
 
     def refresh_swatches(self):
-        """Repaint swatches after ``self.clut`` was changed in place (no signals)."""
         for i, sw in enumerate(self.swatches):
             if i < len(self.clut):
                 sw.set_entry(self.clut[i])
@@ -145,7 +134,6 @@ class PaletteWidget(QWidget):
         for i, sw in enumerate(self.swatches):
             sw.set_selected(i == index)
         e = self.clut[index]
-        # Block signals while updating spins
         for s in (self.spin_r, self.spin_g, self.spin_b, self.spin_a):
             s.blockSignals(True)
         self.spin_r.setValue(e.r)
@@ -176,7 +164,6 @@ class PaletteWidget(QWidget):
         colour = QColorDialog.getColor(initial, self, "Edit Palette Colour",
                                        QColorDialog.ColorDialogOption.ShowAlphaChannel)
         if colour.isValid():
-            # Convert back toward PS2 alpha range
             e.r = colour.red()
             e.g = colour.green()
             e.b = colour.blue()

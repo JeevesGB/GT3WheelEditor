@@ -1,10 +1,3 @@
-"""
-Minimal Tex1 (texture set) parser for GT3 wheels.
-
-Focus: extract the first texture + its CLUT so we can edit colours.
-Full GS memory layout / swizzle is not required for a palette editor.
-"""
-
 from __future__ import annotations
 import struct
 from dataclasses import dataclass, field
